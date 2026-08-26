@@ -1,0 +1,7 @@
+backend/.env
+backend/uploads/
+node_modules/
+backend/node_modules/
+*.log
+frontend-server-err.log
+frontend-server-out.log

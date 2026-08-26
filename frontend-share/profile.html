@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile | GharDaari</title>
+  <link rel="stylesheet" href="style.css?v=14">
+</head>
+<body data-page="profile">
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="home.html"><span>GD</span>GharDaari</a>
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+      <div class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="categories.html">Categories</a>
+        <a href="community.html">Community</a>
+        <a href="resources.html">Resources</a>
+        <a href="profile.html" class="active">Profile</a>
+        <button type="button" data-logout>Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="card profile-header">
+        <div class="profile-photo">GD</div>
+        <div>
+          <p class="eyebrow">Profile</p>
+          <h1 data-profile-name>GharDaari User</h1>
+          <p><strong data-profile-username>@ghardaari</strong></p>
+          <p data-profile-email>user@example.com</p>
+          <p data-profile-bio>Learning and sharing in the GharDaari community.</p>
+          <p class="form-message" id="profileActionMessage" aria-live="polite"></p>
+        </div>
+        <div class="profile-actions">
+          <button class="btn btn-primary" type="button" data-edit-profile>Edit Profile</button>
+          <button class="btn btn-outline" type="button" data-change-password>Change Password</button>
+          <button class="btn btn-outline" type="button" data-request-verification>Verify Email</button>
+          <button class="btn btn-primary" type="button" data-profile-dm hidden>Send DM</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section profile-grid">
+      <div class="card">
+        <h2 data-profile-posts-title>Your Posts</h2>
+        <div class="stack-list" id="profilePosts"></div>
+      </div>
+      <div class="card" data-profile-saved-card>
+        <h2>Saved Posts</h2>
+        <div class="stack-list" id="profileSaved"></div>
+      </div>
+      <div class="card">
+        <h2 data-profile-questions-title>Your Q/As</h2>
+        <div class="stack-list" id="profileQuestions"></div>
+      </div>
+      <div class="card">
+        <h2 data-profile-experiences-title>Your Experiences</h2>
+        <div class="stack-list" id="profileExperiences"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="profileModal" aria-hidden="true">
+    <div class="modal-card">
+      <button type="button" class="modal-close" data-close-modal aria-label="Close">x</button>
+      <h2>Edit Profile</h2>
+      <form id="profileForm" novalidate>
+        <div class="form-group">
+          <label for="profileNameInput">Full name</label>
+          <input type="text" id="profileNameInput">
+        </div>
+        <div class="form-group">
+          <label for="profileUsernameInput">Username</label>
+          <input type="text" id="profileUsernameInput">
+        </div>
+        <div class="form-group">
+          <label for="profileEmailInput">Email</label>
+          <input type="email" id="profileEmailInput">
+        </div>
+        <div class="form-group">
+          <label for="profileBioInput">Bio</label>
+          <textarea id="profileBioInput" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="profileImageInput">Profile image</label>
+          <input type="file" id="profileImageInput" accept="image/*">
+        </div>
+        <div class="preview-wrap" id="profileImagePreviewWrap" hidden>
+          <img id="profileImagePreview" alt="Profile preview">
+        </div>
+        <p class="form-message" id="profileMessage" aria-live="polite"></p>
+        <button class="btn btn-primary full-width" type="submit">Save Profile</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="changePasswordModal" aria-hidden="true">
+    <div class="modal-card">
+      <button type="button" class="modal-close" data-close-modal aria-label="Close">x</button>
+      <h2>Change Password</h2>
+      <form id="changePasswordForm" novalidate>
+        <div class="form-group">
+          <label for="currentPassword">Current password</label>
+          <input type="password" id="currentPassword">
+        </div>
+        <div class="form-group">
+          <label for="newPassword">New password</label>
+          <input type="password" id="newPassword" placeholder="At least 8 characters with a number">
+        </div>
+        <div class="form-group">
+          <label for="confirmNewPassword">Confirm new password</label>
+          <input type="password" id="confirmNewPassword">
+        </div>
+        <p class="form-message" id="changePasswordMessage" aria-live="polite"></p>
+        <button class="btn btn-primary full-width" type="submit">Save Password</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="config.js?v=1"></script>
+  <script src="script.js?v=19"></script>
+</body>
+</html>

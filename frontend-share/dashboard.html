@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | GharDaari</title>
+  <link rel="stylesheet" href="style.css?v=14">
+</head>
+<body data-page="dashboard">
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="home.html"><span>GD</span>GharDaari</a>
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+      <div class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="categories.html">Categories</a>
+        <a href="community.html">Community</a>
+        <a href="resources.html">Resources</a>
+        <a href="profile.html">Profile</a>
+        <a href="dashboard.html" class="active">Admin</a>
+        <button type="button" data-logout>Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="page-heading compact">
+        <p class="eyebrow">Admin</p>
+        <h1>Moderation Reports</h1>
+        <p>Review reports, dismiss safe content, warn users, or remove reported content.</p>
+      </div>
+
+      <div class="card admin-toolbar">
+        <input type="search" id="reportSearch" placeholder="Search reports, users, reasons...">
+        <select id="reportStatusFilter" aria-label="Report status">
+          <option value="">All Reports</option>
+          <option value="PENDING">Pending</option>
+          <option value="REVIEWED">Reviewed</option>
+          <option value="DISMISSED">Dismissed</option>
+          <option value="ACTION_TAKEN">Action Taken</option>
+        </select>
+        <button class="btn btn-primary" type="button" id="refreshReports">Refresh</button>
+        <p class="form-message" id="adminMessage" aria-live="polite"></p>
+      </div>
+
+      <div class="admin-summary" id="adminSummary"></div>
+      <div class="admin-report-list" id="adminReportList"></div>
+    </section>
+  </main>
+
+  <div class="modal" id="adminActionModal" aria-hidden="true">
+    <div class="modal-card">
+      <button type="button" class="modal-close" data-close-modal aria-label="Close">x</button>
+      <h2 id="adminActionTitle">Confirm Action</h2>
+      <p id="adminActionBody">Confirm this moderation action.</p>
+      <form id="adminActionForm" novalidate>
+        <div class="form-group" id="adminWarningGroup" hidden>
+          <label for="adminWarningText">Warning message</label>
+          <textarea id="adminWarningText" rows="3" placeholder="Write the warning for the reported user"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="adminActionNote">Moderator note</label>
+          <textarea id="adminActionNote" rows="3" placeholder="Add a short internal note"></textarea>
+        </div>
+        <p class="form-message" id="adminActionMessage" aria-live="polite"></p>
+        <button class="btn btn-primary full-width" type="submit" id="adminActionSubmit">Confirm</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="config.js?v=1"></script>
+  <script src="script.js?v=19"></script>
+</body>
+</html>

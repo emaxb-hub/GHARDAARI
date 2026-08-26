@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helpful Posts | GharDaari</title>
+  <link rel="stylesheet" href="style.css?v=14">
+</head>
+<body data-page="helpful-posts">
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="home.html"><span>GD</span>GharDaari</a>
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+      <div class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="categories.html" class="active">Categories</a>
+        <a href="community.html">Community</a>
+        <a href="resources.html">Resources</a>
+        <a href="profile.html">Profile</a>
+        <button type="button" data-logout>Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="feed-layout">
+    <aside class="left-panel">
+      <section class="card menu-card">
+        <a href="category.html">Back to Category</a>
+        <a href="home.html">Home Feed</a>
+        <a href="categories.html">Explore Categories</a>
+      </section>
+    </aside>
+
+    <section class="main-feed">
+      <div class="page-heading compact">
+        <p class="eyebrow">Helpful Posts</p>
+        <h1 data-helpful-title>Helpful Posts</h1>
+      </div>
+
+      <section class="feed-list" id="feedList"></section>
+    </section>
+  </main>
+
+  <div class="modal" id="commentModal" aria-hidden="true">
+    <div class="modal-card">
+      <button type="button" class="modal-close" data-close-modal aria-label="Close">x</button>
+      <h2>Comments</h2>
+      <div id="commentList" class="comment-list"></div>
+      <form id="commentForm">
+        <div class="form-group">
+          <label for="commentText">Add comment</label>
+          <input type="text" id="commentText" placeholder="Write a comment...">
+        </div>
+        <button class="btn btn-primary full-width" type="submit">Comment</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="config.js?v=1"></script>
+  <script src="script.js?v=19"></script>
+</body>
+</html>

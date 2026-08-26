@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Category | GharDaari</title>
+  <link rel="stylesheet" href="style.css?v=14">
+</head>
+<body data-page="category">
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="home.html"><span>GD</span>GharDaari</a>
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+      <div class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="categories.html" class="active">Categories</a>
+        <a href="community.html">Community</a>
+        <a href="resources.html">Resources</a>
+        <a href="profile.html">Profile</a>
+        <button type="button" data-logout>Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-heading section">
+      <p class="eyebrow">Category</p>
+      <h1 data-category-title>Category</h1>
+      <div class="toolbar">
+        <input type="search" id="categorySearch" placeholder="Search this category...">
+        <button class="btn btn-primary" type="button" data-open-question>Ask a Question</button>
+        <button class="btn btn-primary" type="button" data-open-experience>Share Experience</button>
+        <button class="btn btn-primary" type="button" data-open-helpful>Helpful Posts</button>
+      </div>
+    </section>
+
+    <section class="section category-detail-grid">
+      <div class="card">
+        <h2>Q/As & Experiences</h2>
+        <div class="stack-list" data-category-qa></div>
+      </div>
+      <div class="card">
+        <div class="card-heading">
+          <h2>Articles</h2>
+          <button class="btn btn-primary" type="button" data-open-article>Add Article</button>
+        </div>
+        <div class="stack-list" data-category-articles></div>
+      </div>
+      <div class="card wide-card">
+        <div class="card-heading">
+          <h2>Recommended Videos</h2>
+          <button class="btn btn-primary" type="button" data-open-video>Add Video</button>
+        </div>
+        <div class="resource-grid compact-grid" data-category-videos></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="questionModal" aria-hidden="true">
+    <div class="modal-card">
+      <button type="button" class="modal-close" data-close-modal aria-label="Close">x</button>
+      <h2>Ask a Question</h2>
+      <form id="questionForm">
+        <div class="form-group">
+          <label for="questionText">Question</label>
+          <textarea id="questionText" rows="4" placeholder="Write your question..."></textarea>
+        </div>
+        <button class="btn btn-primary full-width" type="submit">Add Question</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="experienceModal" aria-hidden="true">
+    <div class="modal-card">
+      <button type="button" class="modal-close" data-close-modal aria-label="Close">x</button>
+      <h2>Share Experience</h2>
+      <form id="experienceForm">
+        <div class="form-group">
+          <label for="experienceText">Experience</label>
+          <textarea id="experienceText" rows="4" placeholder="Share a helpful experience..."></textarea>
+        </div>
+        <button class="btn btn-primary full-width" type="submit">Share</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="commentModal" aria-hidden="true">
+    <div class="modal-card">
+      <button type="button" class="modal-close" data-close-modal aria-label="Close">x</button>
+      <h2>Replies</h2>
+      <div id="commentList" class="comment-list"></div>
+      <form id="commentForm">
+        <div class="form-group">
+          <label for="commentText">Add reply</label>
+          <input type="text" id="commentText" placeholder="Write a reply...">
+        </div>
+        <button class="btn btn-primary full-width" type="submit">Reply</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="articleModal" aria-hidden="true">
+    <div class="modal-card">
+      <button type="button" class="modal-close" data-close-modal aria-label="Close">x</button>
+      <h2>Add Article</h2>
+      <form id="articleForm" novalidate>
+        <div class="form-group">
+          <label for="articleTitle">Title</label>
+          <input type="text" id="articleTitle" placeholder="Article title">
+        </div>
+        <div class="form-group">
+          <label for="articleDescription">Description</label>
+          <textarea id="articleDescription" rows="3" placeholder="Short description..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="articleUrl">Link</label>
+          <input type="url" id="articleUrl" placeholder="https://example.com/article">
+        </div>
+        <p class="form-message" id="articleMessage" aria-live="polite"></p>
+        <button class="btn btn-primary full-width" type="submit">Add Article</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="videoModal" aria-hidden="true">
+    <div class="modal-card">
+      <button type="button" class="modal-close" data-close-modal aria-label="Close">x</button>
+      <h2>Add Recommended Video</h2>
+      <form id="videoForm" novalidate>
+        <div class="form-group">
+          <label for="videoTitle">Title</label>
+          <input type="text" id="videoTitle" placeholder="Video title">
+        </div>
+        <div class="form-group">
+          <label for="videoDescription">Description</label>
+          <textarea id="videoDescription" rows="3" placeholder="Short description..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="videoUrl">Link</label>
+          <input type="url" id="videoUrl" placeholder="https://youtube.com/...">
+        </div>
+        <p class="form-message" id="videoMessage" aria-live="polite"></p>
+        <button class="btn btn-primary full-width" type="submit">Add Video</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="config.js?v=1"></script>
+  <script src="script.js?v=19"></script>
+</body>
+</html>

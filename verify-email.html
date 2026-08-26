@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Email | GharDaari</title>
+  <link rel="stylesheet" href="style.css?v=14">
+</head>
+<body data-page="verify-email">
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="index.html"><span>GD</span>GharDaari</a>
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+      <div class="nav-links">
+        <a href="login.html">Login</a>
+        <a href="signup.html">Signup</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="auth-page">
+    <section class="auth-card">
+      <div class="auth-heading">
+        <div class="form-logo">GD</div>
+        <h1>Verify Email</h1>
+        <p>Use the verification token created during signup or from your profile.</p>
+      </div>
+      <form id="verifyEmailForm" novalidate>
+        <div class="form-group">
+          <label for="verifyToken">Verification token</label>
+          <input type="text" id="verifyToken" placeholder="Paste verification token">
+        </div>
+        <p class="form-message" id="verifyMessage" aria-live="polite"></p>
+        <button class="btn btn-primary full-width" type="submit">Verify Email</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="config.js?v=1"></script>
+  <script src="script.js?v=19"></script>
+</body>
+</html>
