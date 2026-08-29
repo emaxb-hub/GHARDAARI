@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  var deployedBackendApiUrl = "https://ghardaari-backend-aai7ishs0-emaans.vercel.app/api";
+
   var defaultCategories = [
     {
       name: "Kitchen Help",
@@ -367,6 +369,9 @@
     if (!host || host === "localhost" || host === "127.0.0.1") {
       return "http://127.0.0.1:5000/api";
     }
+    if (/\.vercel\.app$/.test(host)) {
+      return deployedBackendApiUrl;
+    }
     return "http://" + host + ":5000/api";
   }
 
@@ -389,7 +394,7 @@
     try {
       response = await fetch(apiBaseUrl() + path, requestOptions);
     } catch (error) {
-      throw new Error("Cannot reach the backend. Please make sure it is running at http://127.0.0.1:5000.");
+      throw new Error("Cannot reach the backend. Please make sure it is running at " + apiBaseUrl() + ".");
     }
     var data = await response.json().catch(function () {
       return {};
