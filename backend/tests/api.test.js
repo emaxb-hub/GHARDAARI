@@ -132,8 +132,6 @@ async function cleanup() {
 
 async function setup() {
   process.env.NODE_ENV = "test";
-  process.env.EMAIL_PROVIDER = "console";
-  process.env.FRONTEND_URL = "http://127.0.0.1:5500";
   await ensureCategory();
   await resetResourceSequence();
   server = await listen(app);
@@ -162,7 +160,9 @@ async function testApiFlow() {
       fullName: "API Test One",
       username: `${prefix}-one`,
       email: emails[0],
-      password: "secret123"
+      password: "secret123",
+      motherName: "Test Mother",
+      birthMonth: "January"
     }
   });
   const secondSignup = await api("/users/signup", {
@@ -171,18 +171,13 @@ async function testApiFlow() {
       fullName: "API Test Two",
       username: `${prefix}-two`,
       email: emails[1],
-      password: "secret123"
+      password: "secret123",
+      motherName: "Test Mother",
+      birthMonth: "February"
     }
   });
   created.userIds.push(firstSignup.user.id, secondSignup.user.id);
-  assert.equal(firstSignup.user.emailVerified, false);
-  assert.ok(firstSignup.verificationToken);
-
-  const verify = await api("/users/verify-email", {
-    method: "POST",
-    body: { token: firstSignup.verificationToken }
-  });
-  assert.equal(verify.message, "Email verified successfully.");
+  assert.equal(firstSignup.user.emailVerified, true);
 
   const login = await api("/users/login", {
     method: "POST",
@@ -212,7 +207,11 @@ async function testApiFlow() {
 
   const forgot = await api("/users/forgot-password", {
     method: "POST",
-    body: { email: emails[1] }
+    body: {
+      email: emails[1],
+      motherName: "test mother",
+      birthMonth: "february"
+    }
   });
   assert.ok(forgot.resetToken);
 

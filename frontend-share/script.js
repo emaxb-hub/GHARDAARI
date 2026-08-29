@@ -114,7 +114,7 @@
   }
 
   function isPublicPage() {
-    return ["intro", "login", "signup", "forgot-password", "reset-password", "verify-email"].indexOf(page()) !== -1;
+    return ["intro", "login", "signup", "forgot-password", "reset-password"].indexOf(page()) !== -1;
   }
 
   function isProtectedPage() {
@@ -610,8 +610,10 @@
         var email = document.getElementById("signupEmail").value.trim();
         var password = document.getElementById("signupPassword").value;
         var confirm = document.getElementById("confirmPassword").value;
+        var motherName = document.getElementById("motherName").value.trim();
+        var birthMonth = document.getElementById("birthMonth").value.trim();
         var target = document.getElementById("signupMessage");
-        if (!fullName || !username || !email || !password || !confirm) return setMessage(target, "Please complete all fields.", false);
+        if (!fullName || !username || !email || !password || !confirm || !motherName || !birthMonth) return setMessage(target, "Please complete all fields.", false);
         if (!validEmail(email)) return setMessage(target, "Please enter a valid email.", false);
         if (password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) return setMessage(target, "Password must be at least 8 characters and include a letter and a number.", false);
         if (password !== confirm) return setMessage(target, "Passwords do not match.", false);
@@ -624,13 +626,12 @@
               fullName: fullName,
               username: username,
               email: email,
-              password: password
+              password: password,
+              motherName: motherName,
+              birthMonth: birthMonth
             }
           });
           saveSession(signupSession);
-          if (signupSession.verificationToken) {
-            localStorage.setItem("ghardaariLastVerificationToken", signupSession.verificationToken);
-          }
           setMessage(target, "Signup successful. Opening home...", true);
           setTimeout(function () { window.location.href = "home.html"; }, 500);
         } catch (error) {
@@ -644,17 +645,24 @@
       forgotForm.addEventListener("submit", async function (event) {
         event.preventDefault();
         var email = document.getElementById("forgotEmail").value.trim();
+        var motherName = document.getElementById("forgotMotherName").value.trim();
+        var birthMonth = document.getElementById("forgotBirthMonth").value.trim();
         var target = document.getElementById("forgotMessage");
         if (!email || !validEmail(email)) return setMessage(target, "Please enter a valid email.", false);
+        if (!motherName || !birthMonth) return setMessage(target, "Please answer both security questions.", false);
 
         try {
           var result = await apiJson("/users/forgot-password", {
             method: "POST",
-            body: { email: email }
+            body: {
+              email: email,
+              motherName: motherName,
+              birthMonth: birthMonth
+            }
           });
           if (result.resetToken) {
             localStorage.setItem("ghardaariLastResetToken", result.resetToken);
-            setMessage(target, "Reset token created. It has been filled on the reset page for local testing.", true);
+            setMessage(target, "Security answers matched. Opening reset page...", true);
             setTimeout(function () { window.location.href = "reset-password.html"; }, 700);
           } else {
             setMessage(target, result.message, true);
@@ -695,31 +703,6 @@
       });
     }
 
-    var verifyForm = document.getElementById("verifyEmailForm");
-    if (verifyForm) {
-      var verifyToken = document.getElementById("verifyToken");
-      if (verifyToken && !verifyToken.value) {
-        verifyToken.value = new URLSearchParams(window.location.search).get("token") || localStorage.getItem("ghardaariLastVerificationToken") || "";
-      }
-      verifyForm.addEventListener("submit", async function (event) {
-        event.preventDefault();
-        var token = document.getElementById("verifyToken").value.trim();
-        var target = document.getElementById("verifyMessage");
-        if (!token) return setMessage(target, "Verification token is required.", false);
-
-        try {
-          var result = await apiJson("/users/verify-email", {
-            method: "POST",
-            body: { token: token }
-          });
-          localStorage.removeItem("ghardaariLastVerificationToken");
-          setMessage(target, result.message, true);
-          setTimeout(function () { window.location.href = sessionToken() ? "profile.html" : "login.html"; }, 900);
-        } catch (error) {
-          setMessage(target, error.message, false);
-        }
-      });
-    }
   }
 
   function getPosts() {
@@ -1554,7 +1537,6 @@
     renderProfile();
     var editButton = document.querySelector("[data-edit-profile]");
     var dmButton = document.querySelector("[data-profile-dm]");
-    var verifyButton = document.querySelector("[data-request-verification]");
     var passwordButton = document.querySelector("[data-change-password]");
     if (editButton) editButton.addEventListener("click", function () {
       var profile = getProfile();
@@ -1571,7 +1553,6 @@
     if (dmButton) dmButton.addEventListener("click", function () {
       startDirectMessage(viewedProfileOrOwn().id, document.getElementById("profileActionMessage"));
     });
-    if (verifyButton) verifyButton.addEventListener("click", requestEmailVerification);
     if (passwordButton) passwordButton.addEventListener("click", function () {
       document.getElementById("changePasswordForm").reset();
       setMessage(document.getElementById("changePasswordMessage"), "", false);
@@ -1649,25 +1630,6 @@
     });
   }
 
-  async function requestEmailVerification() {
-    var target = document.getElementById("profileActionMessage");
-    try {
-      var result = await apiJson("/users/request-email-verification", {
-        method: "POST",
-        body: {}
-      });
-      if (result.verificationToken) {
-        localStorage.setItem("ghardaariLastVerificationToken", result.verificationToken);
-        setMessage(target, "Verification token created. Opening verification page...", true);
-        setTimeout(function () { window.location.href = "verify-email.html"; }, 700);
-        return;
-      }
-      setMessage(target, result.message, true);
-    } catch (error) {
-      setMessage(target, error.message, false);
-    }
-  }
-
   function renderProfile() {
     var profile = viewedProfileOrOwn();
     var own = viewingOwnProfile(profile);
@@ -1681,12 +1643,10 @@
     setText("[data-profile-bio]", profile.bio);
     var editButton = document.querySelector("[data-edit-profile]");
     var dmButton = document.querySelector("[data-profile-dm]");
-    var verifyButton = document.querySelector("[data-request-verification]");
     var passwordButton = document.querySelector("[data-change-password]");
     var savedCard = document.querySelector("[data-profile-saved-card]");
     if (editButton) editButton.hidden = !own;
     if (dmButton) dmButton.hidden = own;
-    if (verifyButton) verifyButton.hidden = !own || profile.emailVerified;
     if (passwordButton) passwordButton.hidden = !own;
     if (savedCard) savedCard.hidden = !own;
     setText("[data-profile-posts-title]", own ? "Your Posts" : profile.fullName + "'s Posts");

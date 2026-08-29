@@ -3,7 +3,6 @@ import crypto from "crypto";
 import { Router } from "express";
 import { requireAuth, signAuthToken } from "../middleware/auth.js";
 import { rateLimit } from "../middleware/rateLimit.js";
-import { canExposeDevTokens, sendPasswordResetEmail, sendVerificationEmail } from "../lib/email.js";
 import { prisma } from "../lib/prisma.js";
 
 const router = Router();
@@ -47,6 +46,19 @@ function tokenHash(token) {
 
 function newAccountToken() {
   return crypto.randomBytes(32).toString("hex");
+}
+
+function normalizeSecurityAnswer(value) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+async function hashSecurityAnswer(value) {
+  return bcrypt.hash(normalizeSecurityAnswer(value), 10);
+}
+
+async function securityAnswerMatches(value, hash) {
+  if (!hash) return false;
+  return bcrypt.compare(normalizeSecurityAnswer(value), hash);
 }
 
 function adminEmails() {
@@ -126,8 +138,10 @@ router.post("/signup", authLimiter, async (req, res, next) => {
   try {
     const { fullName, username, password } = req.body;
     const email = String(req.body.email || "").trim().toLowerCase();
+    const motherName = normalizeSecurityAnswer(req.body.motherName);
+    const birthMonth = normalizeSecurityAnswer(req.body.birthMonth);
 
-    if (!fullName || !username || !email || !password) {
+    if (!fullName || !username || !email || !password || !motherName || !birthMonth) {
       return res.status(400).json({ message: "Please complete all signup fields." });
     }
 
@@ -140,7 +154,6 @@ router.post("/signup", authLimiter, async (req, res, next) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const verificationToken = newAccountToken();
     const user = await prisma.user.create({
       data: {
         fullName,
@@ -148,17 +161,16 @@ router.post("/signup", authLimiter, async (req, res, next) => {
         email,
         passwordHash,
         role: await roleForEmail(email),
+        emailVerified: true,
         bio: "New member of the GharDaari community.",
-        emailVerificationTokenHash: tokenHash(verificationToken),
-        emailVerificationExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        securityMotherNameHash: await hashSecurityAnswer(motherName),
+        securityBirthMonthHash: await hashSecurityAnswer(birthMonth)
       }
     });
-    const emailDelivery = await sendVerificationEmail(user, verificationToken);
 
     res.status(201).json({
       ...authPayload(user),
-      verificationToken: canExposeDevTokens() ? verificationToken : undefined,
-      message: emailDelivery.sent ? "Signup successful. Please check your email to verify your account." : "Signup successful. Local verification token created for testing."
+      message: "Signup successful. Security questions are saved for password reset."
     });
   } catch (error) {
     if (error.code === "P2002") {
@@ -200,30 +212,40 @@ router.post("/login", authLimiter, async (req, res, next) => {
 router.post("/forgot-password", passwordLimiter, async (req, res, next) => {
   try {
     const email = String(req.body.email || "").trim().toLowerCase();
-    const genericResponse = {
-      message: "If an account exists for this email, a password reset link will be sent."
-    };
+    const motherName = normalizeSecurityAnswer(req.body.motherName);
+    const birthMonth = normalizeSecurityAnswer(req.body.birthMonth);
 
     if (!validEmail(email)) {
-      return res.json(genericResponse);
+      return res.status(400).json({ message: "Please enter a valid email." });
+    }
+
+    if (!motherName || !birthMonth) {
+      return res.status(400).json({ message: "Please answer both security questions." });
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.json(genericResponse);
+    if (!user) {
+      return res.status(400).json({ message: "These security answers do not match this account." });
+    }
+
+    const motherMatches = await securityAnswerMatches(motherName, user.securityMotherNameHash);
+    const monthMatches = await securityAnswerMatches(birthMonth, user.securityBirthMonthHash);
+    if (!motherMatches || !monthMatches) {
+      return res.status(400).json({ message: "These security answers do not match this account." });
+    }
 
     const resetToken = newAccountToken();
-    const updatedUser = await prisma.user.update({
+    await prisma.user.update({
       where: { id: user.id },
       data: {
         passwordResetTokenHash: tokenHash(resetToken),
         passwordResetExpiresAt: new Date(Date.now() + 60 * 60 * 1000)
       }
     });
-    await sendPasswordResetEmail(updatedUser, resetToken);
 
     res.json({
-      ...genericResponse,
-      resetToken: canExposeDevTokens() ? resetToken : undefined
+      message: "Security answers matched. You can now reset your password.",
+      resetToken
     });
   } catch (error) {
     next(error);
@@ -260,65 +282,6 @@ router.post("/reset-password", passwordLimiter, async (req, res, next) => {
     });
 
     res.json({ message: "Password reset successful. You can login now." });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.post("/verify-email", authLimiter, async (req, res, next) => {
-  try {
-    const token = String(req.body.token || "").trim();
-
-    if (!token) {
-      return res.status(400).json({ message: "Verification token is required." });
-    }
-
-    const user = await prisma.user.findFirst({
-      where: {
-        emailVerificationTokenHash: tokenHash(token),
-        emailVerificationExpiresAt: { gt: new Date() }
-      }
-    });
-
-    if (!user) {
-      return res.status(400).json({ message: "This verification link is invalid or expired." });
-    }
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerified: true,
-        emailVerificationTokenHash: null,
-        emailVerificationExpiresAt: null
-      }
-    });
-
-    res.json({ message: "Email verified successfully." });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.post("/request-email-verification", requireAuth, async (req, res, next) => {
-  try {
-    if (req.user.emailVerified) {
-      return res.json({ message: "Email is already verified." });
-    }
-
-    const verificationToken = newAccountToken();
-    const updatedUser = await prisma.user.update({
-      where: { id: req.user.id },
-      data: {
-        emailVerificationTokenHash: tokenHash(verificationToken),
-        emailVerificationExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
-      }
-    });
-    const emailDelivery = await sendVerificationEmail(updatedUser, verificationToken);
-
-    res.json({
-      message: emailDelivery.sent ? "Verification email sent. Please check your inbox." : "Verification token created for local testing.",
-      verificationToken: canExposeDevTokens() ? verificationToken : undefined
-    });
   } catch (error) {
     next(error);
   }

@@ -3,6 +3,8 @@ import { PrismaClient, PostType, ResourceType } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const passwordHash = await bcrypt.hash("Test1234", 10);
+const securityMotherNameHash = await bcrypt.hash("demo mother", 10);
+const securityBirthMonthHash = await bcrypt.hash("january", 10);
 
 async function main() {
   const kitchen = await prisma.category.upsert({
@@ -39,6 +41,8 @@ async function main() {
       passwordHash,
       role: "ADMIN",
       emailVerified: true,
+      securityMotherNameHash,
+      securityBirthMonthHash,
       bio: "Demo admin user for checking posts, groups, DMs, reports, and moderation."
     },
     create: {
@@ -48,6 +52,8 @@ async function main() {
       passwordHash,
       role: "ADMIN",
       emailVerified: true,
+      securityMotherNameHash,
+      securityBirthMonthHash,
       bio: "Demo admin user for checking posts, groups, DMs, reports, and moderation."
     }
   });
@@ -60,6 +66,8 @@ async function main() {
       passwordHash,
       role: "MEMBER",
       emailVerified: true,
+      securityMotherNameHash,
+      securityBirthMonthHash,
       bio: "Demo member user for checking comments and direct messages."
     },
     create: {
@@ -69,6 +77,8 @@ async function main() {
       passwordHash,
       role: "MEMBER",
       emailVerified: true,
+      securityMotherNameHash,
+      securityBirthMonthHash,
       bio: "Demo member user for checking comments and direct messages."
     }
   });
@@ -210,6 +220,7 @@ async function main() {
     "Demo data ready.",
     "Test One login: test.one@ghardaari.local / Test1234",
     "Test Two login: test.two@ghardaari.local / Test1234",
+    "Security answers for both: mother name = demo mother, birthday month = january",
     `Demo group id: ${group.id}`,
     `Demo direct conversation id: ${dm.id}`,
     `Demo posts: ${testOnePost.id}, ${testTwoPost.id}`

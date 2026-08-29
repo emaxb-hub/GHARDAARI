@@ -15,6 +15,7 @@ Current setup:
 - Database tool: Prisma ORM
 - Login security: JWT tokens
 - Password security: bcryptjs password hashing
+- Password reset: security questions stored as bcrypt hashes
 
 ## Important Local Links
 
@@ -29,7 +30,6 @@ Use these links when the app is running:
 - Admin moderation page: http://127.0.0.1:5500/dashboard.html
 - Forgot password page: http://127.0.0.1:5500/forgot-password.html
 - Reset password page: http://127.0.0.1:5500/reset-password.html
-- Verify email page: http://127.0.0.1:5500/verify-email.html
 - Backend health check: http://127.0.0.1:5000/api/health
 - Backend API base URL: http://127.0.0.1:5000/api
 - Prisma Studio database viewer: http://127.0.0.1:5555
@@ -52,7 +52,7 @@ Put your deployed backend API URL there:
 
 ```js
 window.GHARDAARI_CONFIG = {
-  apiBaseUrl: "https://your-backend-url.onrender.com/api"
+  apiBaseUrl: "https://your-backend-url.vercel.app/api"
 };
 ```
 
@@ -65,6 +65,8 @@ I created two real database users for testing:
 - Test One: `test.one@ghardaari.local`
 - Test Two: `test.two@ghardaari.local`
 - Password for both: `Test1234`
+- Security mother name for both: `demo mother`
+- Security birthday month for both: `january`
 
 Use Test One if you want to see admin features.
 Use Test Two if you want to see the normal user side.
@@ -153,7 +155,7 @@ The backend tests check:
 - Admin content removal
 - Forgot password and reset password
 - Change password
-- Email verification
+- Security-question password reset
 
 ## Database Setup
 
@@ -189,9 +191,6 @@ ALLOWED_ORIGINS="http://127.0.0.1:5500,http://localhost:5500"
 RATE_LIMIT_STORE="memory"
 FRONTEND_URL="http://127.0.0.1:5500"
 PUBLIC_BACKEND_URL="http://127.0.0.1:5000"
-EMAIL_PROVIDER="console"
-EMAIL_FROM="GharDaari <onboarding@resend.dev>"
-RESEND_API_KEY=""
 STORAGE_DRIVER="local"
 SUPABASE_URL=""
 SUPABASE_SERVICE_ROLE_KEY=""
@@ -207,37 +206,29 @@ JWT_SECRET="a_long_random_secret_that_is_not_shared"
 ALLOWED_ORIGINS="https://your-real-frontend-domain.com"
 FRONTEND_URL="https://your-real-frontend-domain.com"
 PUBLIC_BACKEND_URL="https://your-real-backend-domain.com"
-EMAIL_PROVIDER="resend"
-EMAIL_FROM="GharDaari <verify@your-domain.com>"
-RESEND_API_KEY="your_resend_api_key"
 STORAGE_DRIVER="supabase"
 SUPABASE_URL="https://your-project.supabase.co"
 SUPABASE_SERVICE_ROLE_KEY="your_supabase_service_role_key"
 SUPABASE_STORAGE_BUCKET="ghardaari-uploads"
 ```
 
-## Real Email Setup
+## Password Reset Setup
 
-Real email sending is now connected in the backend.
+This version does not use Resend or real email.
 
-Local testing:
+During signup, the user enters:
 
-- `EMAIL_PROVIDER="console"` keeps email local.
-- The backend still returns reset and verification tokens in development/test mode.
-- This is useful while building and testing.
+- Mother's name
+- Birthday month
 
-Production:
+The backend stores both answers as bcrypt hashes, not plain text.
 
-- `EMAIL_PROVIDER="resend"` sends real emails using the Resend API.
-- `RESEND_API_KEY` must be set.
-- `EMAIL_FROM` should use a verified sender/domain from the email service.
-- `FRONTEND_URL` is used to build password reset and email verification links.
+During forgot password:
 
-The app sends real emails for:
-
-- Signup email verification
-- Request email verification again
-- Forgot password reset link
+- The user enters email
+- The user answers both security questions
+- If answers match, the app opens the reset password page
+- The user chooses a new password
 
 ## Cloud Image Storage Setup
 
@@ -283,16 +274,14 @@ npm run start
 - Admin moderation dashboard
 - Forgot password page
 - Reset password page
-- Verify email page
 
 ### Backend Features
 
 - User signup
 - User login
 - Admin/member user roles
-- Email verification token flow
-- Real email sending for password reset and email verification when `EMAIL_PROVIDER="resend"`
-- Forgot password token flow
+- Security questions for password reset
+- Forgot password reset token flow after security answers match
 - Reset password flow
 - Change password flow
 - JWT-based protected routes
@@ -392,7 +381,6 @@ Prisma currently defines these main tables:
 - Set a strong real `JWT_SECRET` in production.
 - Never commit the real `.env` file.
 - Put production `ADMIN_EMAILS` and `ALLOWED_ORIGINS` in the server environment.
-- Create and verify the real sender/domain in Resend.
 - Create the real Supabase Storage bucket and make it public, or add signed image URLs later.
 - Use `RATE_LIMIT_STORE="database"` in production so rate limits survive backend restarts.
 - Add stricter moderation audit logs if this will be used publicly.
@@ -402,16 +390,15 @@ Prisma currently defines these main tables:
 Use this simple setup:
 
 - Database and image storage: Supabase
-- Email: Resend
-- Backend API: Render Web Service
-- Frontend: Vercel static site, or Render Static Site
+- Backend API: Vercel Serverless Functions
+- Frontend: Vercel Static Site
 
-### Deploy Backend On Render
+### Deploy Backend On Vercel
 
 1. Push this project to GitHub.
-2. Go to Render.
-3. Click `New`.
-4. Choose `Web Service`.
+2. Go to Vercel.
+3. Click `Add New Project`.
+4. Import the GitHub repository.
 5. Connect your GitHub repository.
 6. Set root directory:
 
@@ -422,16 +409,10 @@ backend
 7. Set build command:
 
 ```bash
-npm install && npm run prisma:generate
+npm run vercel-build
 ```
 
-8. Set start command:
-
-```bash
-npm start
-```
-
-9. Add production environment variables:
+8. Add production environment variables:
 
 ```text
 NODE_ENV=production
@@ -441,28 +422,14 @@ ADMIN_EMAILS=your_email@example.com
 ALLOWED_ORIGINS=https://your-frontend-domain.com
 RATE_LIMIT_STORE=database
 FRONTEND_URL=https://your-frontend-domain.com
-PUBLIC_BACKEND_URL=https://your-backend-domain.onrender.com
-EMAIL_PROVIDER=resend
-EMAIL_FROM=GharDaari <onboarding@resend.dev>
-RESEND_API_KEY=your_resend_key
+PUBLIC_BACKEND_URL=https://your-backend-domain.vercel.app
 STORAGE_DRIVER=supabase
 SUPABASE_URL=https://lxwtbkobrdsopgmysesc.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 SUPABASE_STORAGE_BUCKET=ghardaari
 ```
 
-10. Deploy.
-11. After backend deploys, run production migrations once:
-
-```bash
-npm run prisma:deploy
-```
-
-12. Run seed data once:
-
-```bash
-npm run seed
-```
+9. Deploy.
 
 ### Deploy Frontend
 
@@ -471,13 +438,12 @@ npm run seed
 
 ```js
 window.GHARDAARI_CONFIG = {
-  apiBaseUrl: "https://your-backend-domain.onrender.com/api"
+  apiBaseUrl: "https://your-backend-domain.vercel.app/api"
 };
 ```
 
 3. Deploy the static frontend files.
-4. If using Vercel, use `frontend-share` as the project/root folder.
-5. If using Render Static Site, use `frontend-share` as the root directory and leave build command empty.
+4. Use `frontend-share` as the Vercel project/root folder.
 
 After frontend deploys, copy its URL and update backend:
 
@@ -504,14 +470,12 @@ Then redeploy backend once.
 - `dashboard.html`: admin moderation page
 - `forgot-password.html`: forgot password page
 - `reset-password.html`: reset password page
-- `verify-email.html`: email verification page
 - `style.css`: frontend styling
 - `script.js`: frontend behavior and API calls
 - `frontend-share/`: duplicate frontend copy for sharing
 - `backend/src/app.js`: Express app setup and route registration
 - `backend/src/server.js`: starts the backend server
 - `backend/src/routes/`: backend API routes
-- `backend/src/lib/email.js`: real email sending and local email preview
 - `backend/src/lib/storage.js`: local uploads and Supabase Storage uploads
 - `backend/tests/api.test.js`: backend API tests
 - `backend/prisma/schema.prisma`: database models
@@ -532,7 +496,6 @@ Then redeploy backend once.
 - jsonwebtoken: login token creation and checking
 - cors: allows frontend and backend to talk locally
 - dotenv: loads `.env` values
-- Resend API: sends real password reset and verification emails when configured
 - Supabase Storage REST API: stores uploaded images in the cloud when configured
 - Python HTTP server: simple local frontend server
 - Native Node.js test runner style: backend API test execution without extra test libraries
@@ -574,11 +537,9 @@ Use this checklist when checking the app:
 - Block another user.
 - Edit your profile.
 - Change your password.
-- Request email verification.
-- Verify email with the local token.
-- Use forgot password and reset password.
+- Use forgot password with security questions and reset password.
 - Upload a profile image.
 
 ## Current Status In One Line
 
-The app now has a working local frontend, backend API tests, chat auto-refresh polling, seeded demo users, polished admin moderation, mobile/desktop UI fixes, security middleware, database-backed production rate limiting, admin roles, real-email-ready password reset and verification, Supabase-ready image uploads, change password, and email verification token flows; it still needs real production account keys and deployment setup before production.
+The app now has a working local frontend, backend API tests, chat auto-refresh polling, seeded demo users, polished admin moderation, mobile/desktop UI fixes, security middleware, database-backed production rate limiting, admin roles, security-question password reset, Supabase-ready image uploads, and change password; it still needs Vercel production env values and final deployment.

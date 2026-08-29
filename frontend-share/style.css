@@ -33,8 +33,7 @@ body[data-page="dashboard"],
 body[data-page="login"],
 body[data-page="signup"],
 body[data-page="forgot-password"],
-body[data-page="reset-password"],
-body[data-page="verify-email"] {
+body[data-page="reset-password"] {
   background: var(--white);
 }
 
